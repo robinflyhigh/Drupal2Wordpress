@@ -99,6 +99,8 @@
 	}
 	message('URL Alias to Slug Updated');
 
+	message('Cheers !!');
+
 	/*
 		TO DO - Skipped coz didnt have much comment and Users, if you need then share you database and shall work upon and fix it for you.
 		
