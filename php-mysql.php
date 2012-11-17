@@ -244,13 +244,11 @@
 			$this->string_sanitize($args, TRUE);
 			$query = preg_replace_callback(DB_QUERY_REGEXP, array(&$this, 'string_sanitize'), $sql['query']);
 
-			//echo "<hr>$query</hr>";
-		
 			$result = mysqli_query($conn, $query);			
 
 			if (!$result){
 				if ($show_error){
-					echo "Error querying database. : $query";
+					echo "Error querying database. : $query<br/>";
 				}
 			}
 			else{
