@@ -6,4 +6,4 @@ This script can you used to move your drupal 7 site to wordpress, logic has been
 To Do
 =======
 
-Comment and User Migration is not implemented yet as my site does not have much comment and users but would work as soon as i find some time.
+User Migration is not implemented yet as my site have only one admin users but would work as soon as I find some time.
