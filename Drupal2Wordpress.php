@@ -88,7 +88,7 @@
 	message('Posted Type Updated');
 
 	//Count the total tags
-	$wc->query("UPDATE ".$DB_WORDPRESS_PREFIX."term_taxonomy tt SET `count` = ( SELECT COUNT(tr.object_id) FROM ".$DB_WORDPRESS_PREFIX."term_relationships tr WHERE tr.term_taxonomy_id = tt.term_taxonomy_id )");	
+	$wc->query("UPDATE ".$DB_WORDPRESS_PREFIX."term_taxonomy tt SET count = ( SELECT COUNT(tr.object_id) FROM ".$DB_WORDPRESS_PREFIX."term_relationships tr WHERE tr.term_taxonomy_id = tt.term_taxonomy_id )");	
 	message('Tags Count Updated');
 
 	//Get the url alias from drupal and use it for the Post Slug
@@ -99,13 +99,30 @@
 	}
 	message('URL Alias to Slug Updated');
 
+	//Move the comments and their replies - 1 Level
+	$drupal_comments = $dc->results("SELECT DISTINCT c.cid AS comment_ID, c.nid AS comment_post_ID, c.name AS comment_author, c.mail AS comment_author_email, c.homepage AS comment_author_url, c.hostname AS comment_author_IP, FROM_UNIXTIME(c.created) AS comment_date, field_data_comment_body.comment_body_value AS comment_content FROM ".$DB_DRUPAL_PREFIX."comment c INNER JOIN ".$DB_DRUPAL_PREFIX."field_data_comment_body field_data_comment_body ON (c.cid = field_data_comment_body.entity_id) WHERE (c.pid = 0)");
+	foreach($drupal_comments as $duc)
+	{
+		$insert = $wc->query("INSERT INTO  ".$DB_WORDPRESS_PREFIX."comments (comment_ID,comment_post_ID ,comment_author ,comment_author_email ,comment_author_url ,comment_author_IP ,comment_date ,comment_date_gmt, comment_content ,comment_approved,comment_parent)VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')",$duc['comment_ID'],$duc['comment_post_ID'],$duc['comment_author'],$duc['comment_author_email'],$duc['comment_author_url'],$duc['comment_author_IP'],$duc['comment_date'],$duc['comment_date'],$duc['comment_content'],'1','0');
+
+		$drupal_comments_level1 = $dc->results("SELECT DISTINCT c.cid AS comment_ID, c.nid AS comment_post_ID, c.name AS comment_author, c.mail AS comment_author_email, c.homepage AS comment_author_url, c.hostname AS comment_author_IP, FROM_UNIXTIME(c.created) AS comment_date, field_data_comment_body.comment_body_value AS comment_content FROM ".$DB_DRUPAL_PREFIX."comment c INNER JOIN ".$DB_DRUPAL_PREFIX."field_data_comment_body field_data_comment_body ON (c.cid = field_data_comment_body.entity_id) WHERE (c.pid = ".$duc['comment_ID'].")");
+
+		foreach($drupal_comments_level1 as $dcl1)
+		{
+			$wc->query("INSERT INTO  ".$DB_WORDPRESS_PREFIX."comments (comment_ID,comment_post_ID ,comment_author ,comment_author_email ,comment_author_url ,comment_author_IP ,comment_date ,comment_date_gmt, comment_content ,comment_approved,comment_parent)VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')",$dcl1['comment_ID'],$dcl1['comment_post_ID'],$dcl1['comment_author'],$dcl1['comment_author_email'],$dcl1['comment_author_url'],$dcl1['comment_author_IP'],$dcl1['comment_date'],$dcl1['comment_date'],$dcl1['comment_content'],'1',$duc['comment_ID']);
+		}
+	}
+	message('Comments Updated - 1 Level');
+
+	//Update Comment Counts in Wordpress
+	$wc->query("UPDATE ".$DB_WORDPRESS_PREFIX."posts SET comment_count = ( SELECT COUNT(comment_post_id) FROM ".$DB_WORDPRESS_PREFIX."comments WHERE ".$DB_WORDPRESS_PREFIX."posts.id = ".$DB_WORDPRESS_PREFIX."comments.comment_post_id )");
+
 	message('Cheers !!');
 
 	/*
 		TO DO - Skipped coz didnt have much comment and Users, if you need then share you database and shall work upon and fix it for you.
 		
-		1.) Update Comment
-		2.) Update Users/Authors
+		1.) Update Users/Authors
 	*/
 	
 	//Preformat the Object for Debuggin Purpose
