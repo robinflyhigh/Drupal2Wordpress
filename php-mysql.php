@@ -243,7 +243,7 @@
 
 			$this->string_sanitize($args, TRUE);
 			$query = preg_replace_callback(DB_QUERY_REGEXP, array(&$this, 'string_sanitize'), $sql['query']);
-
+			mysqli_query($conn,"SET NAMES 'utf8'");
 			$result = mysqli_query($conn, $query);			
 
 			if (!$result){
