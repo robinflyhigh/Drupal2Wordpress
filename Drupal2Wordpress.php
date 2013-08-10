@@ -67,7 +67,7 @@
 	message('Tags Updated');
 
 	//Get all post from Drupal and add it into wordpress posts table
-	$drupal_posts = $dc->results("SELECT DISTINCT n.nid AS id, n.uid AS post_author, FROM_UNIXTIME(n.created) AS post_date, r.body_value AS post_content, n.title AS post_title, r.body_summary AS post_excerpt, n.type AS post_type,  IF(n.status = 1, 'publish', 'private') AS post_status FROM ".$DB_DRUPAL_PREFIX."node n, ".$DB_DRUPAL_PREFIX."field_data_body r WHERE (n.nid = r.entity_id)");
+	$drupal_posts = $dc->results("SELECT DISTINCT n.nid AS id, n.uid AS post_author, FROM_UNIXTIME(n.created) AS post_date, r.body_value AS post_content, n.title AS post_title, r.body_summary AS post_excerpt, n.type AS post_type,  IF(n.status = 1, 'publish', 'draft') AS post_status FROM ".$DB_DRUPAL_PREFIX."node n, ".$DB_DRUPAL_PREFIX."field_data_body r WHERE (n.nid = r.entity_id)");
 	foreach($drupal_posts as $dp)
 	{
 		$wc->query("INSERT INTO ".$DB_WORDPRESS_PREFIX."posts (id, post_author, post_date, post_content, post_title, post_excerpt, post_type, post_status) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s')", $dp['id'], $dp['post_author'], $dp['post_date'], $dp['post_content'], $dp['post_title'], $dp['post_excerpt'], $dp['post_type'], $dp['post_status']);
@@ -99,7 +99,7 @@
 	}
 	message('URL Alias to Slug Updated');
 
-	//Move the comments and their replies - 1 Level
+	//Move the comments and their replies - 11 Levels
 	$drupal_comments = $dc->results("SELECT DISTINCT c.cid AS comment_ID, c.nid AS comment_post_ID, c.name AS comment_author, c.mail AS comment_author_email, c.homepage AS comment_author_url, c.hostname AS comment_author_IP, FROM_UNIXTIME(c.created) AS comment_date, field_data_comment_body.comment_body_value AS comment_content FROM ".$DB_DRUPAL_PREFIX."comment c INNER JOIN ".$DB_DRUPAL_PREFIX."field_data_comment_body field_data_comment_body ON (c.cid = field_data_comment_body.entity_id) WHERE (c.pid = 0)");
 	foreach($drupal_comments as $duc)
 	{
@@ -110,9 +110,119 @@
 		foreach($drupal_comments_level1 as $dcl1)
 		{
 			$wc->query("INSERT INTO  ".$DB_WORDPRESS_PREFIX."comments (comment_ID,comment_post_ID ,comment_author ,comment_author_email ,comment_author_url ,comment_author_IP ,comment_date ,comment_date_gmt, comment_content ,comment_approved,comment_parent)VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')",$dcl1['comment_ID'],$dcl1['comment_post_ID'],$dcl1['comment_author'],$dcl1['comment_author_email'],$dcl1['comment_author_url'],$dcl1['comment_author_IP'],$dcl1['comment_date'],$dcl1['comment_date'],$dcl1['comment_content'],'1',$duc['comment_ID']);
+
+		$drupal_comments_level2 = $dc->results("SELECT DISTINCT c.cid AS comment_ID, c.nid AS comment_post_ID, c.name AS comment_author, c.mail AS comment_author_email, c.homepage AS comment_author_url, c.hostname AS comment_author_IP, FROM_UNIXTIME(c.created) AS comment_date, field_data_comment_body.comment_body_value AS comment_content FROM ".$DB_DRUPAL_PREFIX."comment c INNER JOIN ".$DB_DRUPAL_PREFIX."field_data_comment_body field_data_comment_body ON (c.cid = field_data_comment_body.entity_id) WHERE (c.pid = ".$dcl1['comment_ID'].")");
+
+			foreach ($drupal_comments_level2 as $dcl2)
+			{
+			$wc->query("INSERT INTO  ".$DB_WORDPRESS_PREFIX."comments (comment_ID,comment_post_ID ,comment_author ,comment_author_email ,comment_author_url ,comment_author_IP ,comment_date ,comment_date_gmt, comment_content ,comment_approved,comment_parent)VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')",$dcl2['comment_ID'],$dcl2['comment_post_ID'],$dcl2['comment_author'],$dcl2['comment_author_email'],$dcl2['comment_author_url'],$dcl2['comment_author_IP'],$dcl2['comment_date'],$dcl2['comment_date'],$dcl2['comment_content'],'1',$dcl1['comment_ID']);
+
+
+		$drupal_comments_level3 = $dc->results("SELECT DISTINCT c.cid AS comment_ID, c.nid AS comment_post_ID, c.name AS comment_author, c.mail AS comment_author_email, c.homepage AS comment_author_url, c.hostname AS comment_author_IP, FROM_UNIXTIME(c.created) AS comment_date, field_data_comment_body.comment_body_value AS comment_content FROM ".$DB_DRUPAL_PREFIX."comment c INNER JOIN ".$DB_DRUPAL_PREFIX."field_data_comment_body field_data_comment_body ON (c.cid = field_data_comment_body.entity_id) WHERE (c.pid = ".$dcl2['comment_ID'].")");
+
+			foreach ($drupal_comments_level3 as $dcl3)
+			{
+			$wc->query("INSERT INTO  ".$DB_WORDPRESS_PREFIX."comments (comment_ID,comment_post_ID ,comment_author ,comment_author_email ,comment_author_url ,comment_author_IP ,comment_date ,comment_date_gmt, comment_content ,comment_approved,comment_parent)VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')",$dcl3['comment_ID'],$dcl3['comment_post_ID'],$dcl3['comment_author'],$dcl3['comment_author_email'],$dcl3['comment_author_url'],$dcl3['comment_author_IP'],$dcl3['comment_date'],$dcl3['comment_date'],$dcl3['comment_content'],'1',$dcl2['comment_ID']);
+
+
+		$drupal_comments_level4 = $dc->results("SELECT DISTINCT c.cid AS comment_ID, c.nid AS comment_post_ID, c.name AS comment_author, c.mail AS comment_author_email, c.homepage AS comment_author_url, c.hostname AS comment_author_IP, FROM_UNIXTIME(c.created) AS comment_date, field_data_comment_body.comment_body_value AS comment_content FROM ".$DB_DRUPAL_PREFIX."comment c INNER JOIN ".$DB_DRUPAL_PREFIX."field_data_comment_body field_data_comment_body ON (c.cid = field_data_comment_body.entity_id) WHERE (c.pid = ".$dcl3['comment_ID'].")");
+
+
+			foreach ($drupal_comments_level4 as $dcl4)
+			{
+			$wc->query("INSERT INTO  ".$DB_WORDPRESS_PREFIX."comments (comment_ID,comment_post_ID ,comment_author ,comment_author_email ,comment_author_url ,comment_author_IP ,comment_date ,comment_date_gmt, comment_content ,comment_approved,comment_parent)VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')",$dcl4['comment_ID'],$dcl4['comment_post_ID'],$dcl4['comment_author'],$dcl4['comment_author_email'],$dcl4['comment_author_url'],$dcl4['comment_author_IP'],$dcl4['comment_date'],$dcl4['comment_date'],$dcl4['comment_content'],'1',$dcl3['comment_ID']);
+
+
+		$drupal_comments_level5 = $dc->results("SELECT DISTINCT c.cid AS comment_ID, c.nid AS comment_post_ID, c.name AS comment_author, c.mail AS comment_author_email, c.homepage AS comment_author_url, c.hostname AS comment_author_IP, FROM_UNIXTIME(c.created) AS comment_date, field_data_comment_body.comment_body_value AS comment_content FROM ".$DB_DRUPAL_PREFIX."comment c INNER JOIN ".$DB_DRUPAL_PREFIX."field_data_comment_body field_data_comment_body ON (c.cid = field_data_comment_body.entity_id) WHERE (c.pid = ".$dcl4['comment_ID'].")");
+
+
+	foreach ($drupal_comments_level5 as $dcl5)
+			{
+			$wc->query("INSERT INTO  ".$DB_WORDPRESS_PREFIX."comments (comment_ID,comment_post_ID ,comment_author ,comment_author_email ,comment_author_url ,comment_author_IP ,comment_date ,comment_date_gmt, comment_content ,comment_approved,comment_parent)VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')",$dcl5['comment_ID'],$dcl5['comment_post_ID'],$dcl5['comment_author'],$dcl5['comment_author_email'],$dcl5['comment_author_url'],$dcl5['comment_author_IP'],$dcl5['comment_date'],$dcl5['comment_date'],$dcl5['comment_content'],'1',$dcl4['comment_ID']);
+
+
+		$drupal_comments_level6 = $dc->results("SELECT DISTINCT c.cid AS comment_ID, c.nid AS comment_post_ID, c.name AS comment_author, c.mail AS comment_author_email, c.homepage AS comment_author_url, c.hostname AS comment_author_IP, FROM_UNIXTIME(c.created) AS comment_date, field_data_comment_body.comment_body_value AS comment_content FROM ".$DB_DRUPAL_PREFIX."comment c INNER JOIN ".$DB_DRUPAL_PREFIX."field_data_comment_body field_data_comment_body ON (c.cid = field_data_comment_body.entity_id) WHERE (c.pid = ".$dcl5['comment_ID'].")");
+
+
+	foreach ($drupal_comments_level6 as $dcl6)
+			{
+			$wc->query("INSERT INTO  ".$DB_WORDPRESS_PREFIX."comments (comment_ID,comment_post_ID ,comment_author ,comment_author_email ,comment_author_url ,comment_author_IP ,comment_date ,comment_date_gmt, comment_content ,comment_approved,comment_parent)VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')",$dcl6['comment_ID'],$dcl6['comment_post_ID'],$dcl6['comment_author'],$dcl6['comment_author_email'],$dcl6['comment_author_url'],$dcl6['comment_author_IP'],$dcl6['comment_date'],$dcl6['comment_date'],$dcl6['comment_content'],'1',$dcl5['comment_ID']);
+
+
+		$drupal_comments_level7 = $dc->results("SELECT DISTINCT c.cid AS comment_ID, c.nid AS comment_post_ID, c.name AS comment_author, c.mail AS comment_author_email, c.homepage AS comment_author_url, c.hostname AS comment_author_IP, FROM_UNIXTIME(c.created) AS comment_date, field_data_comment_body.comment_body_value AS comment_content FROM ".$DB_DRUPAL_PREFIX."comment c INNER JOIN ".$DB_DRUPAL_PREFIX."field_data_comment_body field_data_comment_body ON (c.cid = field_data_comment_body.entity_id) WHERE (c.pid = ".$dcl6['comment_ID'].")");
+
+
+	foreach ($drupal_comments_level7 as $dcl7)
+			{
+			$wc->query("INSERT INTO  ".$DB_WORDPRESS_PREFIX."comments (comment_ID,comment_post_ID ,comment_author ,comment_author_email ,comment_author_url ,comment_author_IP ,comment_date ,comment_date_gmt, comment_content ,comment_approved,comment_parent)VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')",$dcl7['comment_ID'],$dcl7['comment_post_ID'],$dcl7['comment_author'],$dcl7['comment_author_email'],$dcl7['comment_author_url'],$dcl7['comment_author_IP'],$dcl7['comment_date'],$dcl7['comment_date'],$dcl7['comment_content'],'1',$dcl6['comment_ID']);
+
+
+		$drupal_comments_level8 = $dc->results("SELECT DISTINCT c.cid AS comment_ID, c.nid AS comment_post_ID, c.name AS comment_author, c.mail AS comment_author_email, c.homepage AS comment_author_url, c.hostname AS comment_author_IP, FROM_UNIXTIME(c.created) AS comment_date, field_data_comment_body.comment_body_value AS comment_content FROM ".$DB_DRUPAL_PREFIX."comment c INNER JOIN ".$DB_DRUPAL_PREFIX."field_data_comment_body field_data_comment_body ON (c.cid = field_data_comment_body.entity_id) WHERE (c.pid = ".$dcl7['comment_ID'].")");
+
+	foreach ($drupal_comments_level8 as $dcl8)
+			{
+			$wc->query("INSERT INTO  ".$DB_WORDPRESS_PREFIX."comments (comment_ID,comment_post_ID ,comment_author ,comment_author_email ,comment_author_url ,comment_author_IP ,comment_date ,comment_date_gmt, comment_content ,comment_approved,comment_parent)VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')",$dcl8['comment_ID'],$dcl8['comment_post_ID'],$dcl8['comment_author'],$dcl8['comment_author_email'],$dcl8['comment_author_url'],$dcl8['comment_author_IP'],$dcl8['comment_date'],$dcl8['comment_date'],$dcl8['comment_content'],'1',$dcl7['comment_ID']);
+
+
+		$drupal_comments_level9 = $dc->results("SELECT DISTINCT c.cid AS comment_ID, c.nid AS comment_post_ID, c.name AS comment_author, c.mail AS comment_author_email, c.homepage AS comment_author_url, c.hostname AS comment_author_IP, FROM_UNIXTIME(c.created) AS comment_date, field_data_comment_body.comment_body_value AS comment_content FROM ".$DB_DRUPAL_PREFIX."comment c INNER JOIN ".$DB_DRUPAL_PREFIX."field_data_comment_body field_data_comment_body ON (c.cid = field_data_comment_body.entity_id) WHERE (c.pid = ".$dcl8['comment_ID'].")");
+
+	foreach ($drupal_comments_level9 as $dcl9)
+			{
+			$wc->query("INSERT INTO  ".$DB_WORDPRESS_PREFIX."comments (comment_ID,comment_post_ID ,comment_author ,comment_author_email ,comment_author_url ,comment_author_IP ,comment_date ,comment_date_gmt, comment_content ,comment_approved,comment_parent)VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')",$dcl9['comment_ID'],$dcl9['comment_post_ID'],$dcl9['comment_author'],$dcl9['comment_author_email'],$dcl9['comment_author_url'],$dcl9['comment_author_IP'],$dcl9['comment_date'],$dcl9['comment_date'],$dcl9['comment_content'],'1',$dcl8['comment_ID']);
+
+
+
+		$drupal_comments_level10 = $dc->results("SELECT DISTINCT c.cid AS comment_ID, c.nid AS comment_post_ID, c.name AS comment_author, c.mail AS comment_author_email, c.homepage AS comment_author_url, c.hostname AS comment_author_IP, FROM_UNIXTIME(c.created) AS comment_date, field_data_comment_body.comment_body_value AS comment_content FROM ".$DB_DRUPAL_PREFIX."comment c INNER JOIN ".$DB_DRUPAL_PREFIX."field_data_comment_body field_data_comment_body ON (c.cid = field_data_comment_body.entity_id) WHERE (c.pid = ".$dcl9['comment_ID'].")");
+
+
+foreach ($drupal_comments_level10 as $dcl10)
+			{
+			$wc->query("INSERT INTO  ".$DB_WORDPRESS_PREFIX."comments (comment_ID,comment_post_ID ,comment_author ,comment_author_email ,comment_author_url ,comment_author_IP ,comment_date ,comment_date_gmt, comment_content ,comment_approved,comment_parent)VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')",$dcl10['comment_ID'],$dcl10['comment_post_ID'],$dcl10['comment_author'],$dcl10['comment_author_email'],$dcl10['comment_author_url'],$dcl10['comment_author_IP'],$dcl10['comment_date'],$dcl10['comment_date'],$dcl10['comment_content'],'1',$dcl9['comment_ID']);
+
+			echo $dcl10['comment_ID'] . '<br />';
+
+
+		$drupal_comments_level11 = $dc->results("SELECT DISTINCT c.cid AS comment_ID, c.nid AS comment_post_ID, c.name AS comment_author, c.mail AS comment_author_email, c.homepage AS comment_author_url, c.hostname AS comment_author_IP, FROM_UNIXTIME(c.created) AS comment_date, field_data_comment_body.comment_body_value AS comment_content FROM ".$DB_DRUPAL_PREFIX."comment c INNER JOIN ".$DB_DRUPAL_PREFIX."field_data_comment_body field_data_comment_body ON (c.cid = field_data_comment_body.entity_id) WHERE (c.pid = ".$dcl10['comment_ID'].")");
+
+
+
+foreach ($drupal_comments_level11 as $dcl11)
+			{
+			$wc->query("INSERT INTO  ".$DB_WORDPRESS_PREFIX."comments (comment_ID,comment_post_ID ,comment_author ,comment_author_email ,comment_author_url ,comment_author_IP ,comment_date ,comment_date_gmt, comment_content ,comment_approved,comment_parent)VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')",$dcl11['comment_ID'],$dcl11['comment_post_ID'],$dcl11['comment_author'],$dcl11['comment_author_email'],$dcl11['comment_author_url'],$dcl11['comment_author_IP'],$dcl11['comment_date'],$dcl11['comment_date'],$dcl11['comment_content'],'1',$dcl10['comment_ID']);
+
+
+
+
+		$drupal_comments_level12 = $dc->results("SELECT DISTINCT c.cid AS comment_ID, c.nid AS comment_post_ID, c.name AS comment_author, c.mail AS comment_author_email, c.homepage AS comment_author_url, c.hostname AS comment_author_IP, FROM_UNIXTIME(c.created) AS comment_date, field_data_comment_body.comment_body_value AS comment_content FROM ".$DB_DRUPAL_PREFIX."comment c INNER JOIN ".$DB_DRUPAL_PREFIX."field_data_comment_body field_data_comment_body ON (c.cid = field_data_comment_body.entity_id) WHERE (c.pid = ".$dcl11['comment_ID'].")");
+
+
+foreach ($drupal_comments_level12 as $dcl12)
+			{
+			$wc->query("INSERT INTO  ".$DB_WORDPRESS_PREFIX."comments (comment_ID,comment_post_ID ,comment_author ,comment_author_email ,comment_author_url ,comment_author_IP ,comment_date ,comment_date_gmt, comment_content ,comment_approved,comment_parent)VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')",$dcl12['comment_ID'],$dcl12['comment_post_ID'],$dcl12['comment_author'],$dcl12['comment_author_email'],$dcl12['comment_author_url'],$dcl12['comment_author_IP'],$dcl12['comment_date'],$dcl12['comment_date'],$dcl12['comment_content'],'1',$dcl11['comment_ID']);
+
+
+			echo '<br />' . $dcl12['comment_ID'] . '<br />';
+
+
+
+						}
+
+					}
+
+
+
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}		
 		}
 	}
-	message('Comments Updated - 1 Level');
+	message('Comments Updated - 11 Level');
 
 	//Update Comment Counts in Wordpress
 	$wc->query("UPDATE ".$DB_WORDPRESS_PREFIX."posts SET comment_count = ( SELECT COUNT(comment_post_id) FROM ".$DB_WORDPRESS_PREFIX."comments WHERE ".$DB_WORDPRESS_PREFIX."posts.id = ".$DB_WORDPRESS_PREFIX."comments.comment_post_id )");
