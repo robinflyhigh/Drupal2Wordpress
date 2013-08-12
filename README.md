@@ -1,8 +1,14 @@
 Drupal 7 to Wordpress 3.x
 =======
 
-* Script built upon the foundation of robyflyhigh's work. I fixed some details regarding post type and post status after migration, and I also improved it so It can migrate up to 11 levels of nested comments.
+* Script built upon the foundation of robinflyhigh's work. I fixed some details regarding post type and post status after migration, and I also improved it so It can migrate up to 11 levels of nested comments.
 * See also: http://fuzzythinking.davidmullens.com/content/moving-from-drupal-7-to-wordpress-3-3/ to get an insight of the underlying logic.
+
+Contributors
+=======
+
+* versvs (http://www.versvs.net)
+* Ali Sadattalab (http://twitter.com/xbox3000)
 
 What it does
 =======
