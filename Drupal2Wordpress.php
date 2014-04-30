@@ -243,6 +243,26 @@ foreach ($drupal_comments_level12 as $dcl12)
 	//Update Comment Counts in Wordpress
 	$wc->query("UPDATE ".$DB_WORDPRESS_PREFIX."posts SET comment_count = ( SELECT COUNT(comment_post_id) FROM ".$DB_WORDPRESS_PREFIX."comments WHERE ".$DB_WORDPRESS_PREFIX."posts.id = ".$DB_WORDPRESS_PREFIX."comments.comment_post_id )");
 
+
+	// Update wordpress users
+	// From Drupal we're getting the essential user details, including their
+	// user id so we can maintain the same posts ownership when we migrate
+	// content over to Wordpress.
+	//
+	// * Special edge-case: we're skipping the administrative user migration
+	// * Special edge-case: passwords are intentionally left blank as this
+	//   forces user expiration in Wordpress
+	$drupal_users = $dc->results("SELECT u.uid, u.name, u.mail, FROM_UNIXTIME(u.created) AS created, u.access,  FROM ".$DB_DRUPAL_PREFIX."users u WHERE u.uid != 1");
+	foreach($drupal_users as $du)
+	{
+		$wc->query("INSERT INTO ".$DB_WORDPRESS_PREFIX."users 
+			(`ID`, `user_login`, `user_pass`, `user_nicename`, `user_email`, `user_registered`, `display_name`)
+			 VALUES 
+			('%s','%s','',%s','%s',%s','%s')", $du['uid'], $du['name'], $du['name'], $du['mail'], $du['created'], $du['name']);
+	}
+
+	message('Users Updated');
+
 	message('Cheers !!');
 
 	/*
