@@ -68,9 +68,25 @@
 
 	//Get all post from Drupal and add it into wordpress posts table
 	$drupal_posts = $dc->results("SELECT DISTINCT n.nid AS id, n.uid AS post_author, FROM_UNIXTIME(n.created) AS post_date, r.body_value AS post_content, n.title AS post_title, r.body_summary AS post_excerpt, n.type AS post_type,  IF(n.status = 1, 'publish', 'draft') AS post_status FROM ".$DB_DRUPAL_PREFIX."node n, ".$DB_DRUPAL_PREFIX."field_data_body r WHERE (n.nid = r.entity_id)");
+	$post_type = 'page';
 	foreach($drupal_posts as $dp)
 	{
-		$wc->query("INSERT INTO ".$DB_WORDPRESS_PREFIX."posts (id, post_author, post_date, post_content, post_title, post_excerpt, post_type, post_status) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s')", $dp['id'], $dp['post_author'], $dp['post_date'], $dp['post_content'], $dp['post_title'], $dp['post_excerpt'], $dp['post_type'], $dp['post_status']);
+
+		// Wordpress basicially has 2 core post_type options, similar to Drupal -
+		// either a blog-style content, where in Drupal is referred to as 'article'
+		// and in Wordpress this is 'post', and the page-style content which is 
+		// referred to as 'page' content type in both platforms.
+
+		// For the sake of supporting out of the box seamless migration we will
+		// assume that any Drupal 'article' content type should be a Wordpress
+		// 'post' type and anything else will be set to 'page'
+
+		if ($dp['post_type'] === 'article')
+			$post_type = 'post';
+		else 
+			$post_type = 'page';
+
+		$wc->query("INSERT INTO ".$DB_WORDPRESS_PREFIX."posts (id, post_author, post_date, post_content, post_title, post_excerpt, post_type, post_status) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s')", $dp['id'], $dp['post_author'], $dp['post_date'], $dp['post_content'], $dp['post_title'], $dp['post_excerpt'], $post_type, $dp['post_status']);
 	}
 	message('Posts Updated');
 
