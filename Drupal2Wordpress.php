@@ -270,4 +270,3 @@ foreach ($drupal_comments_level12 as $dcl12)
 		}
 		flush();
 	}
-?>
