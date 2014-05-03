@@ -30,12 +30,12 @@
 	//Check if database connection is fine
 	$dcheck = $dc->check();	
 	if (!$dcheck){
-		echo "This $DB_DRUPAL service is AVAILABLE"; die();
+		echo "This $DB_DRUPAL service is UNAVAILABLE"; die();
 	}
 
 	$wcheck = $wc->check();	
 	if (!$wcheck){
-		echo "This $DB_WORDPRESS service is AVAILABLE"; die();
+		echo "This $DB_WORDPRESS service is UNAVAILABLE"; die();
 	}
 
 	message('Database Connection successful');
@@ -86,7 +86,7 @@
 		else 
 			$post_type = 'page';
 
-		$wc->query("INSERT INTO ".$DB_WORDPRESS_PREFIX."posts (id, post_author, post_date, post_date_gmt, post_content, post_title, post_excerpt, post_type, post_status) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s')", $dp['id'], $dp['post_author'], $dp['post_date'], $dp['post_date'], $dp['post_content'], $dp['post_title'], $dp['post_excerpt'], $post_type, $dp['post_status']);
+		$wc->query("INSERT INTO ".$DB_WORDPRESS_PREFIX."posts (id, post_author, post_date, post_date_gmt, post_content, post_title, post_excerpt, post_type, post_status) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s')", $dp['id'], $dp['post_author'], $dp['post_date'], $dp['post_date'], $dp['post_content'], $dp['post_title'], $dp['post_excerpt'], $post_type, $dp['post_status']);
 	}
 	message('Posts Updated');
 
