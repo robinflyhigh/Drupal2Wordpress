@@ -66,6 +66,23 @@
 
 	message('Tags Updated');
 
+	// Update worpdress category for a new Blog entry (as catgegory) which
+	// is a must for a post to be displayed well
+	// Insert a fake new category named Blog
+	$wc->query("INSERT INTO ".$DB_WORDPRESS_PREFIX."terms (name, slug) VALUES ('%s','%s')", 'Blog', 'blog');
+	
+	// Then query to get this entry so we can attach it to content we create
+	$row = $wc->row("SELECT term_id FROM ".$DB_WORDPRESS_PREFIX."terms WHERE name = '%s' AND slug = '%s'", 'Blog', 'blog');
+	if (!empty($row['term_id'])) {
+		$blog_term_id = $row['term_id'];
+
+		$wc->query("INSERT INTO ".$DB_WORDPRESS_PREFIX."term_taxonomy (term_id, taxonomy) VALUES ('%d','%s')", $blog_term_id, 'category');
+
+	}
+
+	message('Category Updated');
+
+
 	//Get all post from Drupal and add it into wordpress posts table
 	$drupal_posts = $dc->results("SELECT DISTINCT n.nid AS id, n.uid AS post_author, FROM_UNIXTIME(n.created) AS post_date, r.body_value AS post_content, n.title AS post_title, r.body_summary AS post_excerpt, n.type AS post_type,  IF(n.status = 1, 'publish', 'draft') AS post_status FROM ".$DB_DRUPAL_PREFIX."node n, ".$DB_DRUPAL_PREFIX."field_data_body r WHERE (n.nid = r.entity_id)");
 	$post_type = 'page';
