@@ -72,6 +72,7 @@
 	$wc->query("INSERT INTO ".$DB_WORDPRESS_PREFIX."terms (name, slug) VALUES ('%s','%s')", 'Blog', 'blog');
 	
 	// Then query to get this entry so we can attach it to content we create
+	$blog_term_id = 0;
 	$row = $wc->row("SELECT term_id FROM ".$DB_WORDPRESS_PREFIX."terms WHERE name = '%s' AND slug = '%s'", 'Blog', 'blog');
 	if (!empty($row['term_id'])) {
 		$blog_term_id = $row['term_id'];
@@ -104,6 +105,13 @@
 			$post_type = 'page';
 
 		$wc->query("INSERT INTO ".$DB_WORDPRESS_PREFIX."posts (id, post_author, post_date, post_date_gmt, post_content, post_title, post_excerpt, post_type, post_status) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s')", $dp['id'], $dp['post_author'], $dp['post_date'], $dp['post_date'], $dp['post_content'], $dp['post_title'], $dp['post_excerpt'], $post_type, $dp['post_status']);
+
+		// Attach all posts to the Blog category we created earlier
+		if ($blog_term_id !== 0) {
+			// Attach all posts the terms/tags 
+			$wc->query("INSERT INTO ".$DB_WORDPRESS_PREFIX."term_relationships (object_id, term_taxonomy_id) VALUES ('%s','%s')", $dp['id'], $blog_term_id);
+		}
+
 	}
 	message('Posts Updated');
 
@@ -111,9 +119,12 @@
 	$drupal_post_tags = $dc->results("SELECT DISTINCT node.nid, taxonomy_term_data.tid FROM (".$DB_DRUPAL_PREFIX."taxonomy_index taxonomy_index INNER JOIN ".$DB_DRUPAL_PREFIX."taxonomy_term_data taxonomy_term_data ON (taxonomy_index.tid = taxonomy_term_data.tid)) INNER JOIN ".$DB_DRUPAL_PREFIX."node node ON (node.nid = taxonomy_index.nid)"); 
 	foreach($drupal_post_tags as $dpt)
 	{
-		$wordpress_term_tax = $wc->row("SELECT DISTINCT term_taxonomy.term_taxonomy_id FROM ".$DB_WORDPRESS_PREFIX."term_taxonomy term_taxonomy  WHERE (term_taxonomy.term_id = ".$dpt['tid'].")"); 
+		$wordpress_term_tax = $wc->row("SELECT DISTINCT term_taxonomy.term_taxonomy_id FROM ".$DB_WORDPRESS_PREFIX."term_taxonomy term_taxonomy  WHERE (term_taxonomy.term_id = ".$dpt['tid'].")");
+
+		// Attach all posts the terms/tags 
 		$wc->query("INSERT INTO ".$DB_WORDPRESS_PREFIX."term_relationships (object_id, term_taxonomy_id) VALUES ('%s','%s')", $dpt['nid'], $wordpress_term_tax['term_taxonomy_id']);
 	}
+
 	message('Tags & Posts Relationships Updated');
 
 	//Update the post type for worpdress
