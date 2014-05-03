@@ -252,13 +252,13 @@ foreach ($drupal_comments_level12 as $dcl12)
 	// * Special edge-case: we're skipping the administrative user migration
 	// * Special edge-case: passwords are intentionally left blank as this
 	//   forces user expiration in Wordpress
-	$drupal_users = $dc->results("SELECT u.uid, u.name, u.mail, FROM_UNIXTIME(u.created) AS created, u.access,  FROM ".$DB_DRUPAL_PREFIX."users u WHERE u.uid != 1");
+	$drupal_users = $dc->results("SELECT u.uid, u.name, u.mail, FROM_UNIXTIME(u.created) AS created, u.access FROM ".$DB_DRUPAL_PREFIX."users u WHERE u.uid != 1 AND u.uid != 0");
 	foreach($drupal_users as $du)
 	{
 		$wc->query("INSERT INTO ".$DB_WORDPRESS_PREFIX."users 
 			(`ID`, `user_login`, `user_pass`, `user_nicename`, `user_email`, `user_registered`, `display_name`)
 			 VALUES 
-			('%s','%s','',%s','%s',%s','%s')", $du['uid'], $du['name'], $du['name'], $du['mail'], $du['created'], $du['name']);
+			('%s','%s','%s','%s','%s','%s','%s')", $du['uid'], $du['name'], '', $du['name'], $du['mail'], $du['created'], $du['name']);
 	}
 
 	message('Users Updated');
