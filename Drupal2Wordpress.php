@@ -139,7 +139,11 @@
 	$drupal_url = $dc->results("SELECT url_alias.source, url_alias.alias FROM ".$DB_DRUPAL_PREFIX."url_alias url_alias WHERE (url_alias.source LIKE 'node%')");
 	foreach($drupal_url as $du)
 	{
-		$update = $wc->query("UPDATE ".$DB_WORDPRESS_PREFIX."posts SET post_name = '%s' WHERE ID = '%s'",$du['alias'],str_replace('node/','',$du['source']));
+		$update = $wc->query("UPDATE ".$DB_WORDPRESS_PREFIX."posts SET post_name = '%s' WHERE ID = '%s'",
+				// Make sure we import without Drupal's leading 'content/' in the URL
+				str_replace('content/', '', $du['alias']),
+				str_replace('node/','',$du['source'])
+		);
 	}
 	message('URL Alias to Slug Updated');
 
