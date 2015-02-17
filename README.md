@@ -1,4 +1,4 @@
-# Drupal 7 to Wordpress 3.9
+# Drupal 7 to Wordpress 3.9 / 4.x
 
 ## Features
 
@@ -18,6 +18,10 @@ See also: http://fuzzythinking.davidmullens.com/content/moving-from-drupal-7-to-
 * The script itself needs to be configured settings the proper values in the .php file.
 * Additionally, you need to perform a basic wp install (just copy the wp files, configure wp-config.php and point your browser to the root URL of your instance, complete the basic setup, and run your Drupal2WordPress script.
 
+
+## Success Stories on the news
+* mjreed on migrating Drupal 7 to Wordpress 4: http://mjreed.com/how-to-migrate-from-drupal-7-to-wordpress-4/
+* chris on migrating a Drupal 7 to Wordpress 4: http://chrisadas.com/2014/09/22/drupal2wordpress-script/
 
 # Contributors
 
