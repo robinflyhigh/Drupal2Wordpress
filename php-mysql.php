@@ -21,6 +21,8 @@
 	define("DB_QUERY_REGEXP", "/(%d|%s|%%|%f|%b)/");
 	
 	class DB {
+	    private $connPool = array();
+	    
 		public function __construct($connection){			
 			if (!empty($connection['host']) && !empty($connection['username']) && !empty($connection['password']) && !empty($connection['database'])){
 				$this->host = $connection['host'];
@@ -233,7 +235,13 @@
 				exit;
 			}
 			
-			$conn = @mysqli_connect($connection['host'],$connection['username'],$connection['password'],$connection['database'],$connection['port'],$connection['socket']);
+			if ($this->connPool[$connection['database']]) {
+			    $conn = $this->connPool[$connection['database']];
+			}
+			else {
+			     $conn = @mysqli_connect($connection['host'],$connection['username'],$connection['password'],$connection['database'],$connection['port'],$connection['socket']);
+			     $this->connPool[$connection['database']] = $conn;
+			}
 			$this->conn = $conn;
 			
 			if (mysqli_connect_errno()){
