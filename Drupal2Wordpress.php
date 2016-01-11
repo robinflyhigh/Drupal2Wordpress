@@ -20,8 +20,8 @@
 	$DB_DRUPAL_PREFIX	 = '';
 
 	//Create Connection Array for Drupal and Wordpress
-	$drupal_connection		= array("host" => "localhost","username" => $DB_DP_USERNAME,"password" => $DB_DP_PASSWORD,"database" => $DB_DRUPAL);
-	$wordpress_connection	= array("host" => "localhost","username" => $DB_WP_USERNAME,"password" => $DB_WP_PASSWORD,"database" => $DB_WORDPRESS);
+	$drupal_connection		= array("host" => $DB_HOSTNAME,"username" => $DB_DP_USERNAME,"password" => $DB_DP_PASSWORD,"database" => $DB_DRUPAL);
+	$wordpress_connection	= array("host" => $DB_HOSTNAME,"username" => $DB_WP_USERNAME,"password" => $DB_WP_PASSWORD,"database" => $DB_WORDPRESS);
 
 	//Create Connection for Drupal and Wordpress
 	$dc = new DB($drupal_connection);
